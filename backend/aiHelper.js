@@ -15,12 +15,11 @@ Database Schema:
 
 1. suppliers
 - supplier_id (INTEGER PRIMARY KEY)
-- supplier_name (TEXT)
-- contact_name (TEXT)
+- name (TEXT)
 - contact_email (TEXT)
 - phone (TEXT)
 - address (TEXT)
-- country (TEXT)
+-created_at (TIMESTAMP)
 
 2. buyers
 - buyer_id (INTEGER PRIMARY KEY)
@@ -85,7 +84,7 @@ function ruleBasedSqlFallback(question) {
     return 'SELECT style_number, category, color, fabric, price_inr, stock_quantity FROM finished_goods ORDER BY stock_quantity DESC LIMIT 5;';
   }
   if (q.includes('supplier')) {
-    return 'SELECT supplier_name, contact_name, contact_email, country FROM suppliers LIMIT 5;';
+    return 'SELECT name, contact_email, address FROM suppliers LIMIT 5;';
   }
   if (q.includes('buyer') || q.includes('customer')) {
     return 'SELECT buyer_name, contact_name, city, country FROM buyers LIMIT 5;';

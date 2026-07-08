@@ -39,10 +39,10 @@ export default function NLQuery() {
       setMessages(prev => [...prev, {
         id: Date.now() + 1,
         sender: 'ai',
-        text: data.answer || "Query executed.",
+        text: data.summary || data.answer || "Query executed.",
         sql: data.sql,
         columns: data.columns,
-        results: data.results,
+        results: data.rows || data.results,
         error: data.error
       }]);
     } catch (err) {

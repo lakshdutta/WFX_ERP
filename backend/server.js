@@ -86,7 +86,15 @@ app.post('/api/query', async (req, res) => {
     try {
       const { columns, rows } = await queryRaw(sql);
       const summary = await generateSummary(question, sql, rows);
-      res.json({ question, sql, columns, rows, summary });
+      res.json({ 
+        question, 
+        sql, 
+        columns, 
+        rows, 
+        results: rows,         // Compatibility fallback
+        summary, 
+        answer: summary        // Compatibility fallback
+      });
     } catch (dbErr) {
       // If SQL execution fails, return query details + clear database error string
       res.json({
@@ -94,7 +102,9 @@ app.post('/api/query', async (req, res) => {
         sql,
         columns: [],
         rows: [],
+        results: [],
         summary: `Query execution failed: ${dbErr.message}`,
+        answer: `Query execution failed: ${dbErr.message}`,
         error: dbErr.message
       });
     }
