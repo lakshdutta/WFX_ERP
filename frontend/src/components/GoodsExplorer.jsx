@@ -21,7 +21,7 @@ export default function GoodsExplorer() {
 
   const fetchGoods = () => {
     setLoading(true);
-    let url = new URL('http://127.0.0.1:8000/api/search');
+    let url = new URL('http://127.0.0.1:3000/api/search');
     url.searchParams.append('page', currentPage.toString());
     url.searchParams.append('limit', '12');
     url.searchParams.append('sort_by', sortBy);

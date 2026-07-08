@@ -24,7 +24,7 @@ export default function ProductSearch() {
 
   const fetchFilteredProducts = () => {
     setLoading(true);
-    let url = new URL('http://127.0.0.1:8000/api/search');
+    let url = new URL('http://127.0.0.1:3000/api/search');
     
     if (q) url.searchParams.append('q', q);
     if (selectedCats.length > 0) url.searchParams.append('category', selectedCats.join(','));
