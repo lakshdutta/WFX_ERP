@@ -1,0 +1,223 @@
+import React, { useState, useEffect } from 'react';
+
+export default function ProductSearch() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Filter States
+  const [q, setQ] = useState('');
+  const [selectedCats, setSelectedCats] = useState([]);
+  const [selectedFabs, setSelectedFabs] = useState([]);
+  const [minGsm, setMinGsm] = useState('');
+  const [maxGsm, setMaxGsm] = useState('');
+  const [sortBy, setSortBy] = useState('style_number');
+  const [sortDir, setSortDir] = useState('asc');
+  
+  // Available filters
+  const categories = ['Dress', 'Shirt', 'Pants', 'Jacket', 'T-Shirt', 'Sweater', 'Skirt', 'Shorts'];
+  const fabrics = ['Cotton', 'Silk', 'Linen', 'Polyester', 'Wool', 'Denim', 'Rayon', 'Nylon'];
+
+  // Trigger search on change of any state
+  useEffect(() => {
+    fetchFilteredProducts();
+  }, [q, selectedCats, selectedFabs, minGsm, maxGsm, sortBy, sortDir]);
+
+  const fetchFilteredProducts = () => {
+    setLoading(true);
+    let url = new URL('http://127.0.0.1:8000/api/search');
+    
+    if (q) url.searchParams.append('q', q);
+    if (selectedCats.length > 0) url.searchParams.append('category', selectedCats.join(','));
+    if (selectedFabs.length > 0) url.searchParams.append('fabric', selectedFabs.join(','));
+    if (minGsm) url.searchParams.append('min_gsm', minGsm);
+    if (maxGsm) url.searchParams.append('max_gsm', maxGsm);
+    url.searchParams.append('sort_by', sortBy);
+    url.searchParams.append('sort_dir', sortDir);
+    url.searchParams.append('limit', '50'); // Fetch a large batch to demonstrate dynamic scrolling/updating
+
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        setItems(data.items || []);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to fetch search results", err);
+        setLoading(false);
+      });
+  };
+
+  const handleCatChange = (cat) => {
+    setSelectedCats(prev => 
+      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+    );
+  };
+
+  const handleFabChange = (fab) => {
+    setSelectedFabs(prev => 
+      prev.includes(fab) ? prev.filter(f => f !== fab) : [...prev, fab]
+    );
+  };
+
+  return (
+    <div className="search-layout">
+      {/* 1. Sidebar Filters */}
+      <div className="filter-sidebar">
+        {/* Text Search */}
+        <div className="filter-group">
+          <label className="filter-label">Search Specifications</label>
+          <input 
+            type="text" 
+            placeholder="Type e.g., Silk, Red..."
+            value={q} 
+            onChange={(e) => setQ(e.target.value)}
+            style={{
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px',
+              color: 'white',
+              padding: '0.65rem 0.85rem',
+              outline: 'none',
+              fontSize: '0.9rem'
+            }}
+          />
+        </div>
+
+        {/* Categories */}
+        <div className="filter-group">
+          <label className="filter-label">Categories</label>
+          <div className="filter-checkbox-list">
+            {categories.map((cat, idx) => (
+              <label key={idx} className="checkbox-label">
+                <input 
+                  type="checkbox" 
+                  checked={selectedCats.includes(cat)}
+                  onChange={() => handleCatChange(cat)}
+                />
+                {cat}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Fabrics */}
+        <div className="filter-group">
+          <label className="filter-label">Fabrics</label>
+          <div className="filter-checkbox-list">
+            {fabrics.map((fab, idx) => (
+              <label key={idx} className="checkbox-label">
+                <input 
+                  type="checkbox" 
+                  checked={selectedFabs.includes(fab)}
+                  onChange={() => handleFabChange(fab)}
+                />
+                {fab}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* GSM Range */}
+        <div className="filter-group">
+          <label className="filter-label">GSM Range</label>
+          <div className="range-inputs">
+            <input 
+              type="number" 
+              placeholder="Min" 
+              value={minGsm} 
+              onChange={(e) => setMinGsm(e.target.value)}
+            />
+            <span style={{ color: 'var(--text-muted)' }}>-</span>
+            <input 
+              type="number" 
+              placeholder="Max" 
+              value={maxGsm} 
+              onChange={(e) => setMaxGsm(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* Sort Controls */}
+        <div className="filter-group">
+          <label className="filter-label">Sort By</label>
+          <select 
+            value={sortBy} 
+            onChange={(e) => setSortBy(e.target.value)}
+            style={{
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px',
+              color: 'white',
+              padding: '0.5rem',
+              outline: 'none'
+            }}
+          >
+            <option value="style_number" style={{ background: 'var(--bg-secondary)' }}>Style Number</option>
+            <option value="price_inr" style={{ background: 'var(--bg-secondary)' }}>Price (INR)</option>
+            <option value="gsm" style={{ background: 'var(--bg-secondary)' }}>GSM</option>
+            <option value="stock_quantity" style={{ background: 'var(--bg-secondary)' }}>Stock Qty</option>
+          </select>
+          
+          <select 
+            value={sortDir} 
+            onChange={(e) => setSortDir(e.target.value)}
+            style={{
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px',
+              color: 'white',
+              padding: '0.5rem',
+              outline: 'none',
+              marginTop: '0.5rem'
+            }}
+          >
+            <option value="asc" style={{ background: 'var(--bg-secondary)' }}>Ascending</option>
+            <option value="desc" style={{ background: 'var(--bg-secondary)' }}>Descending</option>
+          </select>
+        </div>
+      </div>
+
+      {/* 2. Results Section */}
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 700 }}>Results ({items.length})</h2>
+          {loading && <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Updating list...</span>}
+        </div>
+
+        {items.length === 0 ? (
+          <div className="glass-card" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+            No products found matching the selected filters.
+          </div>
+        ) : (
+          <div className="gallery-grid">
+            {items.map((item, idx) => (
+              <div key={idx} className="glass-card product-card" style={{ padding: '1rem' }}>
+                <div className="product-image-container" style={{ height: '140px' }}>
+                  <img 
+                    src={item.image_url} 
+                    alt={item.style_number} 
+                    className="product-image"
+                  />
+                </div>
+                <div className="product-info">
+                  <div className="product-meta">
+                    <span>{item.fabric} • {item.gsm} GSM</span>
+                    <span>{item.category}</span>
+                  </div>
+                  <div className="product-title" style={{ fontSize: '1rem', marginTop: '0.25rem' }}>
+                    {item.color} - {item.style_number}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
+                    <span className="product-price" style={{ fontSize: '1rem' }}>₹{Number(item.price_inr).toLocaleString()}</span>
+                    <span className="product-stock" style={{ fontSize: '0.75rem' }}>Stock: {item.stock_quantity}</span>
+                  </div>
+                  <button className="btn-wfx-outline" style={{ marginTop: '0.75rem', width: '100%' }}>Explore</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

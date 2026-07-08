@@ -1,0 +1,51 @@
+# ==========================
+# Python
+# ==========================
+
+backend/__pycache__/
+backend/*.py[cod]
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.ruff_cache/
+backend/.coverage
+backend/htmlcov/
+
+# Virtual Environment
+backend/venv/
+backend/.venv/
+backend/env/
+
+# Environment Variables
+backend/.env
+
+# Logs
+backend/*.log
+
+# ==========================
+# Node (Frontend)
+# ==========================
+
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.vite/
+
+# ==========================
+# VS Code
+# ==========================
+
+.vscode/
+
+# ==========================
+# OS Files
+# ==========================
+
+.DS_Store
+Thumbs.db
+
+# ==========================
+# Git
+# ==========================
+
+*.swp
+*.swogit
