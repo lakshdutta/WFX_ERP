@@ -175,17 +175,33 @@ app.get('/api/search', async (req, res) => {
       if (config.isSupabase) {
         // Use PostgreSQL vector cosine distance
         const pgWhereStr = whereStr.replace(/\bcategory\b/g, 'fg.category').replace(/\bfabric\b/g, 'fg.fabric').replace(/\bgsm\b/g, 'fg.gsm');
+        const queryTerms = q.toLowerCase().split(/\s+/).filter(t => t.length > 1);
+        let similarityExpr = `(1 - (tp.image_embedding <=> $${params.length + 1}))`;
+        let paramIndex = params.length + 2;
+        let queryParams = [...params, `[${queryVec.join(',')}]`];
+        
+        for (const term of queryTerms) {
+          similarityExpr += ` + 
+            (CASE WHEN fg.fabric ILIKE $${paramIndex} THEN 0.5 ELSE 0 END) + 
+            (CASE WHEN fg.category ILIKE $${paramIndex + 1} THEN 0.5 ELSE 0 END) + 
+            (CASE WHEN fg.color ILIKE $${paramIndex + 2} THEN 0.5 ELSE 0 END) + 
+            (CASE WHEN fg.style_number ILIKE $${paramIndex + 3} THEN 0.5 ELSE 0 END)`;
+          queryParams.push(`%${term}%`, `%${term}%`, `%${term}%`, `%${term}%`);
+          paramIndex += 4;
+        }
+        
+        queryParams.push(limitNum, offset);
+        
         const sql = `
           SELECT fg.style_number, fg.category, fg.color, fg.fabric, fg.gsm, fg.price_inr, fg.stock_quantity, tp.image_url,
-                 (1 - (tp.image_embedding <=> $${params.length + 1})) AS similarity
+                 ${similarityExpr} AS similarity
           FROM finished_goods fg
           JOIN tech_packs tp ON fg.style_number = tp.style_number
-          ${pgWhereStr ? `${pgWhereStr} AND` : 'WHERE'} (1 - (tp.image_embedding <=> $${params.length + 1})) > 0.1
+          ${pgWhereStr}
           ORDER BY similarity DESC
-          LIMIT $${params.length + 2} OFFSET $${params.length + 3}
+          LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
         `;
-        const searchParams = [...params, queryVec, limitNum, offset];
-        const rows = await query(sql, searchParams);
+        const rows = await query(sql, queryParams);
         
         // Fetch total items matching filters
         const countSql = `SELECT COUNT(*) AS count FROM finished_goods ${whereStr}`;
@@ -227,15 +243,26 @@ app.get('/api/search', async (req, res) => {
             candidateVec = getPseudoEmbedding(`${item.color} ${item.fabric} ${item.category} ${item.style_number}`);
           }
           
-          const similarity = cosineSimilarity(queryVec, candidateVec);
+          let similarity = cosineSimilarity(queryVec, candidateVec);
+
+          // Apply text matching boost
+          const queryTerms = q.toLowerCase().split(/\s+/).filter(t => t.length > 1);
+          let matchCount = 0;
+          const candidateText = `${item.color} ${item.fabric} ${item.category} ${item.style_number}`.toLowerCase();
+          for (const term of queryTerms) {
+            if (candidateText.includes(term)) {
+              matchCount++;
+            }
+          }
+          if (queryTerms.length > 0) {
+            similarity += (matchCount / queryTerms.length) * 0.5;
+          }
+
           return { ...item, similarity };
         });
 
-        // Filter and sort
-        const filtered = scoredItems
-          .filter(item => item.similarity > 0.05)
-          .sort((a, b) => b.similarity - a.similarity);
-
+        // Sort (no hard threshold filter to prevent empty results)
+        const filtered = scoredItems.sort((a, b) => b.similarity - a.similarity);
         const paginated = filtered.slice(offset, offset + limitNum);
         
         return res.json({
@@ -315,16 +342,32 @@ app.post('/api/search-image', upload.single('image'), async (req, res) => {
 
     // Rank candidates by visual similarity
     if (config.isSupabase) {
+      let similarityExpr = `(1 - (tp.image_embedding <=> $1))`;
+      let queryParams = [`[${queryVec.join(',')}]`];
+      
+      if (textFallback) {
+        const queryTerms = textFallback.toLowerCase().split(/\s+/).filter(t => t.length > 1);
+        let paramIndex = 2;
+        for (const term of queryTerms) {
+          similarityExpr += ` + 
+            (CASE WHEN fg.fabric ILIKE $${paramIndex} THEN 0.5 ELSE 0 END) + 
+            (CASE WHEN fg.category ILIKE $${paramIndex + 1} THEN 0.5 ELSE 0 END) + 
+            (CASE WHEN fg.color ILIKE $${paramIndex + 2} THEN 0.5 ELSE 0 END) + 
+            (CASE WHEN fg.style_number ILIKE $${paramIndex + 3} THEN 0.5 ELSE 0 END)`;
+          queryParams.push(`%${term}%`, `%${term}%`, `%${term}%`, `%${term}%`);
+          paramIndex += 4;
+        }
+      }
+      
       const sql = `
         SELECT fg.style_number, fg.category, fg.color, fg.fabric, fg.gsm, fg.price_inr, fg.stock_quantity, tp.image_url,
-               (1 - (tp.image_embedding <=> $1)) AS similarity
+               ${similarityExpr} AS similarity
         FROM finished_goods fg
         JOIN tech_packs tp ON fg.style_number = tp.style_number
-        WHERE (1 - (tp.image_embedding <=> $1)) > 0.05
         ORDER BY similarity DESC
         LIMIT 12
       `;
-      const rows = await query(sql, [queryVec]);
+      const rows = await query(sql, queryParams);
       res.json({ items: rows });
     } else {
       const rows = await query(`
@@ -344,12 +387,27 @@ app.post('/api/search-image', upload.single('image'), async (req, res) => {
         if (!candidateVec || !Array.isArray(candidateVec)) {
           candidateVec = getPseudoEmbedding(`${item.color} ${item.fabric} ${item.category} ${item.style_number}`);
         }
-        const similarity = cosineSimilarity(queryVec, candidateVec);
+        let similarity = cosineSimilarity(queryVec, candidateVec);
+
+        // Apply text matching boost if visual query is text
+        if (textFallback) {
+          const queryTerms = textFallback.toLowerCase().split(/\s+/).filter(t => t.length > 1);
+          let matchCount = 0;
+          const candidateText = `${item.color} ${item.fabric} ${item.category} ${item.style_number}`.toLowerCase();
+          for (const term of queryTerms) {
+            if (candidateText.includes(term)) {
+              matchCount++;
+            }
+          }
+          if (queryTerms.length > 0) {
+            similarity += (matchCount / queryTerms.length) * 0.5;
+          }
+        }
+
         return { ...item, similarity };
       });
 
       const filtered = scoredItems
-        .filter(item => item.similarity > 0.02)
         .sort((a, b) => b.similarity - a.similarity)
         .slice(0, 12);
 
