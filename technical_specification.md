@@ -8,8 +8,8 @@ The **Aura ERP Exploration Platform** is a state-of-the-art AI-enabled web appli
 
 This platform solves these problems through:
 1. **Natural Language Interface (NL2SQL):** Allowing users to query their database in plain conversational English (e.g., "Show pending invoices above ₹1,000" or "What is our total revenue by buyer?") and instantly receive formatted charts, tables, and AI explanations.
-2. **Dynamic Semantic Exploration:** Combining structured multi-factor filters (GSM, Fabric, Category) with vector embeddings (CLIP) to support both text search and visual sketch-based image matching.
-3. **Resilient Local-First Development Architecture:** Creating a hybrid environment that works seamlessly on online production servers (Supabase + Vanna AI + Render/Vercel) while maintaining a zero-setup local SQLite mock fallback mode that behaves identically for local engineering teams.
+2. **Dynamic Semantic Exploration:** Combining structured multi-factor filters (GSM, Fabric, Category) with vector embeddings (Pseudo-Embeddings) to support both text search and visual sketch-based image matching.
+3. **Resilient Local-First Development Architecture:** Creating a hybrid environment that works seamlessly on online production servers (Supabase + OpenAI + Render/Vercel) while maintaining a zero-setup local SQLite mock fallback mode that behaves identically for local engineering teams.
 
 ---
 
@@ -28,7 +28,7 @@ Aura ERP follows a modular three-tier architecture: Presentation, Application, a
                 ▼                        ▼
 ┌────────────────────────────────────────────────────────┐
 │                    APPLICATION TIER                    │
-│   FastAPI Server (Router, Vectorizer, AI Translator)   │
+│  Express Server (Router, Vectorizer, AI Translator)   │
 └───────────────┬────────────────────────┬───────────────┘
                 │                        │
         Postgres TCP Pool        SQLite Connection (Fallback)
@@ -55,11 +55,11 @@ To support semantic visual search, the storage tier enables:
   $$\text{Cosine Distance}(A, B) = 1 - \frac{A \cdot B}{\|A\| \|B\|}$$
   This is optimized in Supabase via indexing for sub-second retrieval across thousands of rows.
 
-### 2.2 Application Tier (FastAPI)
+### 2.2 Application Tier (Express/Node.js)
 The backend service acts as a lightweight, async router:
-- **FastAPI Framework:** Selected for native async support, automated OpenAPI docs generation, and low execution overhead.
-- **Vanna AI & Regex Translation:** Generates SQL queries. Vanna is trained on database DDL and query-SQL pairs. If API keys are absent, the router utilizes regex parsing to construct appropriate SQL statements, ensuring stable local testing.
-- **CLIP ViT-B-32 Vectorizer:** Converts incoming images or text search terms into a 512-dimension normalized vector. The service employs a lazy-load pattern to avoid loading heavy machine learning models into memory until an image search is triggered.
+- **Express.js Framework:** Selected for low execution overhead, high flexibility, and ease of integration in the Node.js ecosystem.
+- **OpenAI & Heuristics Translation:** Generates SQL queries using GPT-4o with a database DDL schema prompt. If API keys are absent, the router utilizes heuristic rules to construct appropriate SQL statements, ensuring stable local testing.
+- **Deterministic Pseudo-Embedding Generator:** Converts incoming images (buffers) or text search terms into a 512-dimension normalized unit vector deterministically using SHA-256 and a Mulberry32 PRNG. This avoids heavy external machine learning libraries and runs entirely offline out-of-the-box.
 
 ### 2.3 Presentation Tier (React)
 The frontend UI is crafted as a premium single-page dashboard:
@@ -246,8 +246,7 @@ CREATE INDEX idx_sales_invoices_order ON sales_invoices(order_number);
         "color": "Navy Blue",
         "similarity": 0.94523
       }
-    ],
-    "search_method": "local-python-cosine"
+    ]
   }
   ```
 
@@ -263,7 +262,7 @@ While the initial blueprint proposed Typesense for quick text searching alongsid
 ### 5.2 Decoupled Fallback Router Pattern
 To support rapid local development without requiring immediate Supabase provisioning, we designed a database fallback router.
 - **Rationale:** Team members onboarding to the project shouldn't have to wait for database permissions or API key provisioning to run the codebase.
-- **Impact:** On startup, the backend checks for environment keys. If they are missing, it initializes a local SQLite instance, converts PostgreSQL DDL syntax to SQLite syntax on the fly, seeds it with 1,000 generated rows, and hosts the services immediately. Vector similarity search runs via NumPy array operations, mirroring the production environment.
+- **Impact:** On startup, the backend checks for environment keys. If they are missing, it initializes a local SQLite instance, converts PostgreSQL DDL syntax to SQLite syntax on the fly, seeds it with 1,000 generated rows, and hosts the services immediately. Vector similarity search runs via JavaScript array operations, mirroring the production environment.
 
 ### 5.3 Pure Vanilla CSS Design System
 We opted to styling the React interface using custom CSS Custom Properties (variables) and direct styling rules rather than a framework like Tailwind.
@@ -287,4 +286,4 @@ We opted to styling the React interface using custom CSS Custom Properties (vari
 2. **Backend (Render):**
    - Create a new Web Service pointing to the backend directory.
    - Configure the environment variables (`DATABASE_URL`, `OPENAI_API_KEY`, etc.).
-   - Deploy via Uvicorn.
+   - Deploy via Node.js (e.g., `npm start`).

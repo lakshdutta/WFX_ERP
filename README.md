@@ -14,10 +14,10 @@ graph TD
         UI[Dashboard & Chat Screens] --> API_Client[HTTP Client]
     end
     
-    subgraph Backend [FastAPI API Service]
-        API_Client --> CORS[FastAPI Server]
-        CORS --> NL2SQL[Vanna AI NL2SQL]
-        CORS --> CLIP[CLIP Encoder]
+    subgraph Backend [Express API Service]
+        API_Client --> CORS[Express Server]
+        CORS --> NL2SQL[OpenAI NL2SQL]
+        CORS --> CLIP[Pseudo-Embedding Encoder]
         CORS --> DB_Router[Database Router]
     end
     
@@ -31,9 +31,9 @@ graph TD
 - **Supabase (PostgreSQL):** Production database utilizing `pgvector` for storing 512-dimension image vectors, and native Postgres B-tree indexes for structured columns.
 - **SQLite Fallback:** If Supabase credentials are not found in the `.env` file, the backend automatically reads the schema and seed files, adapts Postgres-specific SQL dialects to SQLite on the fly, and runs completely locally out of the box.
 
-### 2. Backend Tier (FastAPI)
-- **Vanna AI & Regex Fallback:** Handles Natural Language questions. If LLM keys are provided, it compiles requests into SQL using Vanna. Otherwise, a regex rule-mapper resolves standard ERP requests.
-- **Image Vector Search:** Employs CLIP (`clip-ViT-B-32`) to generate 512-dimensional garment embeddings. In SQLite fallback mode, cosine similarity is computed in pure Python using NumPy; in Supabase mode, it uses the database's `<=>` operator.
+### 2. Backend Tier (Express/Node.js)
+- **OpenAI & Heuristics Fallback:** Handles Natural Language questions. If an OpenAI API key is provided, it compiles requests into SQL using OpenAI GPT-4o. Otherwise, a heuristics-based rule mapper resolves standard ERP requests.
+- **Image Vector Search:** Employs a custom deterministic pseudo-embedding generator to produce 512-dimensional garment embeddings. In SQLite fallback mode, cosine similarity is computed in pure JavaScript; in Supabase mode, it uses the database's `<=>` operator.
 
 ### 3. Frontend Tier (React)
 - Scaffolds with **Vite** for fast HMR.
@@ -52,13 +52,12 @@ ERP/
 │   ├── seed_data.py         # Python generator script
 │   └── README.md            # Supabase import instructions
 ├── backend/
-│   ├── app/
-│   │   ├── main.py          # FastAPI application routes
-│   │   ├── config.py        # Settings loader
-│   │   ├── database.py      # Dual connection adapter
-│   │   ├── vector_helper.py # Image similarity encoder
-│   │   └── ai_helper.py     # NL2SQL & Answer generator
-│   ├── requirements.txt     # Python packages
+│   ├── server.js            # Express application routes
+│   ├── config.js            # Settings loader
+│   ├── database.js          # Dual connection adapter
+│   ├── vectorHelper.js      # Pseudo-embedding vectorizer
+│   ├── aiHelper.js          # OpenAI or Heuristics translation
+│   ├── package.json         # Node package configuration
 │   └── .env                 # Local variables
 └── frontend/
     ├── src/
@@ -80,21 +79,13 @@ ERP/
 ### 1. Database Setup (Supabase)
 Please check the detailed guide inside the [database/README.md](file:///C:/Users/laksh/.gemini/antigravity/scratch/ERP/database/README.md) folder to create your Supabase tables and import the generated `seed.sql` dump.
 
-### 2. Backend Service (FastAPI)
-Navigate to the `backend` folder, create a virtual environment, install requirements, and run the dev server:
+### 2. Backend Service (Express/Node.js)
+Navigate to the `backend` folder, install dependencies, and run the dev server:
 
 ```bash
 cd backend
-
-# If using uv (recommended):
-uv pip install -r requirements.txt
-uv run uvicorn app.main:app --reload
-
-# If using standard python:
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+npm install
+npm run dev
 ```
 
 *Note: Without a `.env` file, the backend will auto-create and seed `database/erp_local.db` using SQLite and run fully locally.*
