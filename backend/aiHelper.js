@@ -17,40 +17,52 @@ Return ONLY the raw SQL query. Do not wrap it in markdown code blocks, do not us
 Database Schema:
 
 1. suppliers
-- supplier_id (INTEGER PRIMARY KEY)
-- name (TEXT)
+- id (INTEGER PRIMARY KEY)
+- name (TEXT) -- Company Name
 - contact_email (TEXT)
 - phone (TEXT)
 - address (TEXT)
--created_at (TIMESTAMP)
+- country (TEXT)
+- contact (TEXT)
+- lead_time (INTEGER) -- Lead time in days
+- rating (REAL)
+- created_at (TIMESTAMP)
 
 2. buyers
-- buyer_id (INTEGER PRIMARY KEY)
-- buyer_name (TEXT)
-- contact_name (TEXT)
+- id (INTEGER PRIMARY KEY)
+- name (TEXT) -- Company Name
 - contact_email (TEXT)
 - phone (TEXT)
 - address (TEXT)
-- city (TEXT)
 - country (TEXT)
+- buyer_category (TEXT)
+- created_at (TIMESTAMP)
 
 3. finished_goods
-- finished_goods_id (INTEGER PRIMARY KEY)
-- style_number (TEXT UNIQUE)
-- category (TEXT) -- e.g., Dress, Shirt, Pants, Jacket, T-Shirt, Sweater, Skirt, Shorts
-- color (TEXT)
+- style_number (TEXT PRIMARY KEY)
+- style_name (TEXT)
+- category (TEXT)
 - fabric (TEXT)
 - gsm (INTEGER)
-- price_inr (REAL)
+- color (TEXT)
+- print (TEXT)
+- season (TEXT)
+- brand (TEXT)
+- cost (REAL)
+- price_inr (REAL) -- Selling Price
 - stock_quantity (INTEGER)
-- image_url (TEXT)
+- supplier_id (INTEGER) -- References suppliers
+- created_at (TIMESTAMP)
 
 4. tech_packs
-- tech_pack_id (INTEGER PRIMARY KEY)
-- finished_goods_id (INTEGER) -- References finished_goods
-- designer_name (TEXT)
-- version (TEXT)
-- specs_json (TEXT) -- JSON containing measurements/specs
+- id (INTEGER PRIMARY KEY)
+- style_number (TEXT) -- References finished_goods
+- fabric_details (TEXT)
+- construction (TEXT)
+- wash_instructions (TEXT)
+- specification_details (TEXT)
+- image_url (TEXT)
+- image_embedding (vector)
 - created_at (TIMESTAMP)
 
 5. sales_orders
@@ -59,20 +71,22 @@ Database Schema:
 - style_number (TEXT) -- References finished_goods
 - quantity (INTEGER)
 - order_date (DATE)
-- status (TEXT) -- e.g., Pending, Processing, Shipped, Delivered, Cancelled
+- shipment_date (DATE)
+- status (TEXT) -- 'Pending', 'Shipped', 'Delivered', 'Cancelled'
 - created_at (TIMESTAMP)
 
 6. sales_invoices
 - invoice_number (TEXT PRIMARY KEY)
 - order_number (TEXT) -- References sales_orders
 - amount_inr (REAL)
-- payment_status (TEXT) -- e.g., Unpaid, Paid, Overdue
+- currency (TEXT)
+- payment_status (TEXT) -- 'Paid', 'Pending', 'Overdue'
 - issue_date (DATE)
 - due_date (DATE)
 - created_at (TIMESTAMP)
 
 Rules:
-- Do not query the "visual_embedding" column unless explicitly requested.
+- Do not query the "image_embedding" column unless explicitly requested.
 - Limit output to raw executable SQL query string ONLY. Do not use Markdown styling.
 `;
 
@@ -90,7 +104,7 @@ function ruleBasedSqlFallback(question) {
     return 'SELECT name, contact_email, address FROM suppliers LIMIT 5;';
   }
   if (q.includes('buyer') || q.includes('customer')) {
-    return 'SELECT buyer_name, contact_name, city, country FROM buyers LIMIT 5;';
+    return 'SELECT name, contact_email, address FROM buyers LIMIT 5;';
   }
   if (q.includes('invoice')) {
     return 'SELECT invoice_number, amount_inr, payment_status, issue_date FROM sales_invoices ORDER BY issue_date DESC LIMIT 5;';
@@ -99,7 +113,7 @@ function ruleBasedSqlFallback(question) {
     return 'SELECT order_number, status, quantity, order_date FROM sales_orders ORDER BY order_date DESC LIMIT 5;';
   }
   if (q.includes('designer') || q.includes('tech pack') || q.includes('specs')) {
-    return 'SELECT designer_name, version, created_at FROM tech_packs LIMIT 5;';
+    return 'SELECT id, style_number, created_at FROM tech_packs LIMIT 5;';
   }
 
   // Generic fallback: fetch some finished goods

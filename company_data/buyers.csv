@@ -1,0 +1,13 @@
+buyer_id,company_name,country,buyer_category
+BUY-001,Nordic Retail AB,Sweden,Department Store
+BUY-002,Maple Leaf Fashion,Canada,Specialty Retailer
+BUY-003,Thames & Co,United Kingdom,Department Store
+BUY-004,Bayside Brands,United States,Brand
+BUY-005,Rhine Mode GmbH,Germany,E-commerce
+BUY-006,Sakura Style KK,Japan,Specialty Retailer
+BUY-007,Outback Outfitters,Australia,Specialty Retailer
+BUY-008,Iberia Moda SL,Spain,Department Store
+BUY-009,Gulf Fashion Trading,UAE,Wholesaler
+BUY-010,Lion City Apparel,Singapore,E-commerce
+BUY-011,Prairie Wholesale Inc,United States,Wholesaler
+BUY-012,Alpine Casuals SA,Switzerland,Brand

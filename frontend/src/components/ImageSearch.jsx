@@ -41,7 +41,7 @@ export default function ImageSearch() {
       formData.append('text_fallback', text);
     }
 
-    fetch('http://127.0.0.1:3000/api/search-image', {
+    fetch('http://127.0.0.1:3001/api/search-image', {
       method: 'POST',
       body: formData
     })

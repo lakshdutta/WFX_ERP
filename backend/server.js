@@ -24,7 +24,7 @@ app.get('/api/stats', async (req, res) => {
     const countSuppliers = await query("SELECT COUNT(*) AS count FROM suppliers");
     const countBuyers = await query("SELECT COUNT(*) AS count FROM buyers");
     const countOrders = await query("SELECT COUNT(*) AS count FROM sales_orders");
-    const sumRevenue = await query("SELECT SUM(amount_inr) AS sum FROM sales_invoices");
+    const sumRevenue = await query("SELECT SUM(amount_inr) AS sum FROM sales_invoices WHERE payment_status = 'Paid'");
 
     const totals = {
       finished_goods: countGoods[0]?.count || 0,
@@ -40,6 +40,7 @@ app.get('/api/stats', async (req, res) => {
       trendSql = `
         SELECT TO_CHAR(issue_date, 'YYYY-MM') AS month, SUM(amount_inr) AS revenue, COUNT(*) AS count 
         FROM sales_invoices 
+        WHERE payment_status = 'Paid'
         GROUP BY month 
         ORDER BY month ASC
       `;
@@ -47,6 +48,7 @@ app.get('/api/stats', async (req, res) => {
       trendSql = `
         SELECT strftime('%Y-%m', issue_date) AS month, SUM(amount_inr) AS revenue, COUNT(*) AS count 
         FROM sales_invoices 
+        WHERE payment_status = 'Paid'
         GROUP BY month 
         ORDER BY month ASC
       `;
@@ -121,6 +123,9 @@ app.get('/api/search', async (req, res) => {
       q, 
       category, 
       fabric, 
+      print,
+      season,
+      brand,
       min_gsm, 
       max_gsm, 
       sort_by = 'style_number', 
@@ -151,6 +156,27 @@ app.get('/api/search', async (req, res) => {
       params.push(...fabs);
     }
 
+    if (print) {
+      const prints = print.split(',').map(p => p.trim());
+      const printPlaceholders = prints.map((_, i) => config.isSupabase ? `$${params.length + i + 1}` : '?').join(',');
+      whereClauses.push(`print IN (${printPlaceholders})`);
+      params.push(...prints);
+    }
+
+    if (season) {
+      const seasons = season.split(',').map(s => s.trim());
+      const seasonPlaceholders = seasons.map((_, i) => config.isSupabase ? `$${params.length + i + 1}` : '?').join(',');
+      whereClauses.push(`season IN (${seasonPlaceholders})`);
+      params.push(...seasons);
+    }
+
+    if (brand) {
+      const brands = brand.split(',').map(b => b.trim());
+      const brandPlaceholders = brands.map((_, i) => config.isSupabase ? `$${params.length + i + 1}` : '?').join(',');
+      whereClauses.push(`brand IN (${brandPlaceholders})`);
+      params.push(...brands);
+    }
+
     if (min_gsm) {
       whereClauses.push(`gsm >= ${config.isSupabase ? `$${params.length + 1}` : '?'}`);
       params.push(parseInt(min_gsm));
@@ -164,7 +190,7 @@ app.get('/api/search', async (req, res) => {
     const whereStr = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
 
     // Validate sorting parameters
-    const validSortCols = ['style_number', 'price_inr', 'gsm', 'stock_quantity'];
+    const validSortCols = ['style_number', 'price_inr', 'gsm', 'stock_quantity', 'brand', 'season'];
     const sortCol = validSortCols.includes(sort_by) ? sort_by : 'style_number';
     const sortOrder = sort_dir.toLowerCase() === 'desc' ? 'DESC' : 'ASC';
 
@@ -174,7 +200,7 @@ app.get('/api/search', async (req, res) => {
 
       if (config.isSupabase) {
         // Use PostgreSQL vector cosine distance
-        const pgWhereStr = whereStr.replace(/\bcategory\b/g, 'fg.category').replace(/\bfabric\b/g, 'fg.fabric').replace(/\bgsm\b/g, 'fg.gsm');
+        const pgWhereStr = whereStr.replace(/\bcategory\b/g, 'fg.category').replace(/\bfabric\b/g, 'fg.fabric').replace(/\bgsm\b/g, 'fg.gsm').replace(/\bprint\b/g, 'fg.print').replace(/\bseason\b/g, 'fg.season').replace(/\bbrand\b/g, 'fg.brand');
         const queryTerms = q.toLowerCase().split(/\s+/).filter(t => t.length > 1);
         let similarityExpr = `(1 - (tp.image_embedding <=> $${params.length + 1}))`;
         let paramIndex = params.length + 2;
@@ -193,10 +219,12 @@ app.get('/api/search', async (req, res) => {
         queryParams.push(limitNum, offset);
         
         const sql = `
-          SELECT fg.style_number, fg.category, fg.color, fg.fabric, fg.gsm, fg.price_inr, fg.stock_quantity, tp.image_url,
+          SELECT fg.style_number, fg.style_name, fg.category, fg.color, fg.fabric, fg.gsm, fg.print, fg.season, fg.brand, fg.price_inr, fg.stock_quantity, tp.image_url,
+                 s.name AS supplier_name,
                  ${similarityExpr} AS similarity
           FROM finished_goods fg
           JOIN tech_packs tp ON fg.style_number = tp.style_number
+          LEFT JOIN suppliers s ON fg.supplier_id = s.id
           ${pgWhereStr}
           ORDER BY similarity DESC
           LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
@@ -220,11 +248,12 @@ app.get('/api/search', async (req, res) => {
       } else {
         // SQLite fallback vector search
         // Retrieve all records matching metadata filters, then calculate similarity in memory
-        const pgWhereStr = whereStr.replace(/\bcategory\b/g, 'fg.category').replace(/\bfabric\b/g, 'fg.fabric').replace(/\bgsm\b/g, 'fg.gsm');
+        const pgWhereStr = whereStr.replace(/\bcategory\b/g, 'fg.category').replace(/\bfabric\b/g, 'fg.fabric').replace(/\bgsm\b/g, 'fg.gsm').replace(/\bprint\b/g, 'fg.print').replace(/\bseason\b/g, 'fg.season').replace(/\bbrand\b/g, 'fg.brand');
         const sql = `
-          SELECT fg.*, tp.image_url, tp.image_embedding AS visual_embedding
+          SELECT fg.*, s.name AS supplier_name, tp.image_url, tp.image_embedding AS visual_embedding
           FROM finished_goods fg
           LEFT JOIN tech_packs tp ON fg.style_number = tp.style_number
+          LEFT JOIN suppliers s ON fg.supplier_id = s.id
           ${pgWhereStr}
         `;
         const allCandidates = await query(sql, params);
@@ -283,12 +312,13 @@ app.get('/api/search', async (req, res) => {
 
       let sql;
       let queryParams;
-      const pgWhereStr = whereStr.replace(/\bcategory\b/g, 'fg.category').replace(/\bfabric\b/g, 'fg.fabric').replace(/\bgsm\b/g, 'fg.gsm');
+      const pgWhereStr = whereStr.replace(/\bcategory\b/g, 'fg.category').replace(/\bfabric\b/g, 'fg.fabric').replace(/\bgsm\b/g, 'fg.gsm').replace(/\bprint\b/g, 'fg.print').replace(/\bseason\b/g, 'fg.season').replace(/\bbrand\b/g, 'fg.brand');
       if (config.isSupabase) {
         sql = `
-          SELECT fg.style_number, fg.category, fg.color, fg.fabric, fg.gsm, fg.price_inr, fg.stock_quantity, tp.image_url
+          SELECT fg.style_number, fg.style_name, fg.category, fg.color, fg.fabric, fg.gsm, fg.print, fg.season, fg.brand, fg.price_inr, fg.stock_quantity, tp.image_url, s.name AS supplier_name
           FROM finished_goods fg
           LEFT JOIN tech_packs tp ON fg.style_number = tp.style_number
+          LEFT JOIN suppliers s ON fg.supplier_id = s.id
           ${pgWhereStr}
           ORDER BY fg.${sortCol} ${sortOrder}
           LIMIT $${params.length + 1} OFFSET $${params.length + 2}
@@ -296,9 +326,10 @@ app.get('/api/search', async (req, res) => {
         queryParams = [...params, limitNum, offset];
       } else {
         sql = `
-          SELECT fg.*, tp.image_url
+          SELECT fg.*, tp.image_url, s.name AS supplier_name
           FROM finished_goods fg
           LEFT JOIN tech_packs tp ON fg.style_number = tp.style_number
+          LEFT JOIN suppliers s ON fg.supplier_id = s.id
           ${pgWhereStr}
           ORDER BY fg.${sortCol} ${sortOrder}
           LIMIT ? OFFSET ?
@@ -360,10 +391,11 @@ app.post('/api/search-image', upload.single('image'), async (req, res) => {
       }
       
       const sql = `
-        SELECT fg.style_number, fg.category, fg.color, fg.fabric, fg.gsm, fg.price_inr, fg.stock_quantity, tp.image_url,
+        SELECT fg.style_number, fg.style_name, fg.category, fg.color, fg.fabric, fg.gsm, fg.print, fg.season, fg.brand, fg.price_inr, fg.stock_quantity, tp.image_url, s.name AS supplier_name,
                ${similarityExpr} AS similarity
         FROM finished_goods fg
         JOIN tech_packs tp ON fg.style_number = tp.style_number
+        LEFT JOIN suppliers s ON fg.supplier_id = s.id
         ORDER BY similarity DESC
         LIMIT 12
       `;
@@ -371,9 +403,10 @@ app.post('/api/search-image', upload.single('image'), async (req, res) => {
       res.json({ items: rows });
     } else {
       const rows = await query(`
-        SELECT fg.*, tp.image_url, tp.image_embedding AS visual_embedding
+        SELECT fg.*, s.name AS supplier_name, tp.image_url, tp.image_embedding AS visual_embedding
         FROM finished_goods fg
         LEFT JOIN tech_packs tp ON fg.style_number = tp.style_number
+        LEFT JOIN suppliers s ON fg.supplier_id = s.id
       `);
       const scoredItems = rows.map(item => {
         let candidateVec = null;

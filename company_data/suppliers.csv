@@ -1,0 +1,13 @@
+supplier_id,company_name,country,contact,lead_time_days,rating
+SUP-001,ABC Textiles,India,rajesh@abctextiles.in,90,3.2
+SUP-002,Dhaka Knitwear Ltd,Bangladesh,orders@dhakaknit.com.bd,90,3.6
+SUP-003,Tirupur Garments Co,India,sales@tirupurgarments.in,30,3.3
+SUP-004,Shenzhen Fashion Works,China,li.wei@szfashionworks.cn,21,4.4
+SUP-005,Colombo Apparel Group,Sri Lanka,info@colomboapparel.lk,75,3.2
+SUP-006,Hanoi Stitch Co,Vietnam,contact@hanoistitch.vn,60,3.1
+SUP-007,Karachi Textile Mills,Pakistan,export@ktmills.pk,21,3.4
+SUP-008,Istanbul Denim House,Turkey,mehmet@istanbuldenim.com.tr,75,4.2
+SUP-009,Jakarta Garmindo,Indonesia,sales@garmindo.co.id,75,3.4
+SUP-010,Phnom Penh Sewing Ltd,Cambodia,pp.sewing@ppsl.com.kh,90,4.4
+SUP-011,Noida Knits Pvt Ltd,India,hello@noidaknits.in,60,3.4
+SUP-012,Guangzhou Weave Co,China,amy@gzweave.cn,75,3.6

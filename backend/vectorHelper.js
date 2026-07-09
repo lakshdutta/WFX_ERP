@@ -14,15 +14,13 @@ function getSeedFromHash(data) {
   return parseInt(hash.substring(0, 8), 16);
 }
 
-/**
- * Generates a deterministic 512-dimension unit vector for any text or binary buffer.
- */
 export function getPseudoEmbedding(inputTextOrBuffer) {
   let seed;
+  let text = '';
   if (Buffer.isBuffer(inputTextOrBuffer)) {
     seed = getSeedFromHash(inputTextOrBuffer);
   } else {
-    const text = (inputTextOrBuffer || '').toLowerCase().trim();
+    text = (inputTextOrBuffer || '').toLowerCase().trim();
     seed = getSeedFromHash(text);
   }
 
@@ -34,6 +32,31 @@ export function getPseudoEmbedding(inputTextOrBuffer) {
     vector.push(val);
     sumSq += val * val;
   }
+
+  if (text) {
+      const categories = ['dress', 'shirt', 'pants', 'jacket', 't-shirt', 'sweater', 'skirt', 'shorts'];
+      const fabrics = ['cotton', 'silk', 'linen', 'polyester', 'wool', 'denim', 'rayon', 'nylon'];
+      
+      let spiked = false;
+      // Add spikes to the same indices the seeder uses to guarantee matches
+      categories.forEach((cat, idx) => {
+          if (text.includes(cat) || text.includes(cat.replace('-','')) || text === cat + 's' || text.includes(cat + 's')) {
+              vector[idx] += 10.0; // Large spike
+              spiked = true;
+          }
+      });
+      fabrics.forEach((fab, idx) => {
+          if (text.includes(fab)) {
+              vector[idx + 8] += 10.0; // Large spike, shifted by 8 to avoid category overlap
+              spiked = true;
+          }
+      });
+      
+      if (spiked) {
+          sumSq = vector.reduce((sum, v) => sum + v * v, 0);
+      }
+  }
+
   const norm = Math.sqrt(sumSq) || 1;
   return vector.map(v => v / norm);
 }

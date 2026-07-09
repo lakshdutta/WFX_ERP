@@ -21,7 +21,7 @@ export default function GoodsExplorer() {
 
   const fetchGoods = () => {
     setLoading(true);
-    let url = new URL('http://127.0.0.1:3000/api/search');
+    let url = new URL('http://127.0.0.1:3001/api/search');
     url.searchParams.append('page', currentPage.toString());
     url.searchParams.append('limit', '12');
     url.searchParams.append('sort_by', sortBy);
@@ -178,10 +178,13 @@ export default function GoodsExplorer() {
                 </div>
                 <div className="product-info">
                   <div className="product-meta">
-                    <span>{item.fabric} • {item.gsm} GSM</span>
-                    <span>{item.category}</span>
+                    <span>{item.fabric} • {item.gsm} GSM • {item.print}</span>
+                    <span>{item.category} • {item.season}</span>
                   </div>
-                  <div className="product-title">{item.color} - {item.style_number}</div>
+                  <div className="product-title">{item.brand ? <strong>{item.brand}</strong> : null} {item.style_name || `${item.color} - ${item.style_number}`}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                    By: {item.supplier_name || `Supplier #${item.supplier_id}`} | {item.style_number}
+                  </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
                     <span className="product-price">₹{Number(item.price_inr).toLocaleString()}</span>
                     <span className="product-stock" style={{ color: item.stock_quantity < 50 ? 'var(--danger)' : 'var(--text-muted)' }}>
@@ -245,8 +248,12 @@ export default function GoodsExplorer() {
                   <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'white' }}>{selectedProduct.gsm} GSM</div>
                 </div>
                 <div>
-                  <strong style={{ color: 'var(--text-muted)' }}>Color Theme:</strong>
-                  <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'white' }}>{selectedProduct.color}</div>
+                  <strong style={{ color: 'var(--text-muted)' }}>Color & Print:</strong>
+                  <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'white' }}>{selectedProduct.color}, {selectedProduct.print}</div>
+                </div>
+                <div>
+                  <strong style={{ color: 'var(--text-muted)' }}>Brand & Season:</strong>
+                  <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'white' }}>{selectedProduct.brand}, {selectedProduct.season}</div>
                 </div>
                 <div>
                   <strong style={{ color: 'var(--text-muted)' }}>Stock Status:</strong>
@@ -268,7 +275,10 @@ export default function GoodsExplorer() {
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: 'auto' }}>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Base Cost:</span>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Cost Price: <strong style={{color: 'white'}}>₹{Number(selectedProduct.cost).toLocaleString()}</strong></span>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '2px' }}>Selling Price:</span>
+                </div>
                 <span className="product-price" style={{ fontSize: '1.4rem' }}>₹{Number(selectedProduct.price_inr).toLocaleString()}</span>
               </div>
             </div>
