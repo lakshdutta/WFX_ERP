@@ -107,28 +107,28 @@ function ruleBasedSqlFallback(question) {
 }
 
 export async function generateSql(question) {
-  if (openaiClient) {
-    try {
-      
-      const response = await openaiClient.chat.completions.create({
-        model: 'openrouter/free',
-        messages: [
-          { role: 'system', content: SCHEMA_PROMPT },
-          { role: 'user', content: `Translate this question to raw SQL: ${question}` }
-        ],
-        temperature: 0.1
-      });
-      let sql = response.choices[0].message.content.trim();
-      // Strip markdown code block wrappers if any
-      if (sql.startsWith('```')) {
-        sql = sql.replace(/^```sql?/i, '').replace(/```$/, '').trim();
-      }
-      return sql;
-    } catch (err) {
-      console.warn("[WARN] OpenAI API error, using local heuristic fallback query.", err.message);
-      return ruleBasedSqlFallback(question);
+  if (!openaiClient) {
+    console.warn("[WARN] OpenAI API key not configured, using heuristic fallback.");
+    return ruleBasedSqlFallback(question);
+  }
+
+  try {
+    const response = await openaiClient.chat.completions.create({
+      model: 'openrouter/free',
+      messages: [
+        { role: 'system', content: SCHEMA_PROMPT },
+        { role: 'user', content: question }
+      ],
+      temperature: 0.1
+    });
+
+    let sql = response.choices[0].message.content.trim();
+    if (sql.startsWith('```')) {
+      sql = sql.replace(/^```sql?/i, '').replace(/```$/, '').trim();
     }
-  } else {
+    return sql;
+  } catch (err) {
+    console.error("[ERROR] OpenAI text-to-SQL failed:", err.message);
     return ruleBasedSqlFallback(question);
   }
 }
