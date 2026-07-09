@@ -3,7 +3,10 @@ import { config } from './config.js';
 
 let openaiClient = null;
 if (config.openaiApiKey) {
-  openaiClient = new OpenAI({ apiKey: config.openaiApiKey });
+  openaiClient = new OpenAI({
+  apiKey: config.openaiApiKey,
+  baseURL: "https://openrouter.ai/api/v1",
+});
 }
 
 const SCHEMA_PROMPT = `
@@ -106,8 +109,9 @@ function ruleBasedSqlFallback(question) {
 export async function generateSql(question) {
   if (openaiClient) {
     try {
+      
       const response = await openaiClient.chat.completions.create({
-        model: 'gpt-4o',
+        model: 'openrouter/free',
         messages: [
           { role: 'system', content: SCHEMA_PROMPT },
           { role: 'user', content: `Translate this question to raw SQL: ${question}` }
@@ -133,7 +137,7 @@ export async function generateSummary(question, sql, rows) {
   if (openaiClient) {
     try {
       const response = await openaiClient.chat.completions.create({
-        model: 'gpt-4o',
+        model: 'openrouter/free',
         messages: [
           { role: 'system', content: 'You are a helpful business intelligence assistant. Summarize the returned rows for the query in 1-2 business-friendly sentences.' },
           { 

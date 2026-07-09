@@ -72,10 +72,10 @@ export default function ProductSearch() {
             value={q} 
             onChange={(e) => setQ(e.target.value)}
             style={{
-              background: 'rgba(255,255,255,0.05)',
+              background: '#ffffff',
               border: '1px solid var(--border-color)',
               borderRadius: '8px',
-              color: 'white',
+              color: 'var(--text-main)',
               padding: '0.65rem 0.85rem',
               outline: 'none',
               fontSize: '0.9rem'
@@ -144,10 +144,10 @@ export default function ProductSearch() {
             value={sortBy} 
             onChange={(e) => setSortBy(e.target.value)}
             style={{
-              background: 'rgba(255,255,255,0.05)',
+              background: '#ffffff',
               border: '1px solid var(--border-color)',
               borderRadius: '8px',
-              color: 'white',
+              color: 'var(--text-main)',
               padding: '0.5rem',
               outline: 'none'
             }}
@@ -162,10 +162,10 @@ export default function ProductSearch() {
             value={sortDir} 
             onChange={(e) => setSortDir(e.target.value)}
             style={{
-              background: 'rgba(255,255,255,0.05)',
+              background: '#ffffff',
               border: '1px solid var(--border-color)',
               borderRadius: '8px',
-              color: 'white',
+              color: 'var(--text-main)',
               padding: '0.5rem',
               outline: 'none',
               marginTop: '0.5rem'
@@ -193,6 +193,11 @@ export default function ProductSearch() {
             {items.map((item, idx) => (
               <div key={idx} className="glass-card product-card" style={{ padding: '1rem' }}>
                 <div className="product-image-container" style={{ height: '140px' }}>
+                  {item.similarity !== undefined && item.similarity !== null && (
+                    <span className="similarity-badge">
+                      {Math.round(item.similarity * 100)}% Match
+                    </span>
+                  )}
                   <img 
                     src={item.image_url} 
                     alt={item.style_number} 

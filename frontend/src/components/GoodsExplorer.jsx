@@ -67,14 +67,14 @@ export default function GoodsExplorer() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '8px',
-              color: 'white',
-              padding: '0.5rem 1rem',
-              outline: 'none',
-              flex: 1
-            }}
+            background: '#ffffff',
+            border: '1px solid var(--border-color)',
+            borderRadius: '8px',
+            color: 'var(--text-main)',
+            padding: '0.5rem 1rem',
+            outline: 'none',
+            flex: 1
+}}
           />
           <button 
             type="submit"

@@ -5,6 +5,14 @@
     -- Enable uuid-ossp for UUID generation if needed
     CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+    -- Drop existing tables for clean re-seeding
+    DROP TABLE IF EXISTS sales_invoices CASCADE;
+    DROP TABLE IF EXISTS sales_orders CASCADE;
+    DROP TABLE IF EXISTS tech_packs CASCADE;
+    DROP TABLE IF EXISTS finished_goods CASCADE;
+    DROP TABLE IF EXISTS buyers CASCADE;
+    DROP TABLE IF EXISTS suppliers CASCADE;
+
     -- 1. Suppliers Table
     CREATE TABLE IF NOT EXISTS suppliers (
         id SERIAL PRIMARY KEY,

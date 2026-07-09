@@ -9,10 +9,10 @@ function runVerification() {
 
     const db = new sqlite3.Database(DB_PATH, sqlite3.OPEN_READONLY, (err) => {
         if (err) {
-            console.error("❌ Failed to connect to SQLite database:", err.message);
+            console.error(" Failed to connect to SQLite database:", err.message);
             process.exit(1);
         }
-        console.log("✅ Successfully connected to erp_local.db");
+        console.log(" Successfully connected to erp_local.db");
         checkTables();
     });
 
@@ -23,9 +23,9 @@ function runVerification() {
         tables.forEach(table => {
             db.get(`SELECT COUNT(*) as count FROM ${table};`, [], (err, row) => {
                 if (err) {
-                    console.error(`❌ Error querying table ${table}:`, err.message);
+                    console.error(` Error querying table ${table}:`, err.message);
                 } else {
-                    console.log(`✅ Table '${table}' exists and contains ${row.count} rows`);
+                    console.log(` Table '${table}' exists and contains ${row.count} rows`);
                 }
                 checksCompleted++;
                 if (checksCompleted === tables.length) {
@@ -46,9 +46,9 @@ function runVerification() {
         `;
         db.all(query, [], (err, rows) => {
             if (err) {
-                console.error("❌ Product search query failed:", err.message);
+                console.error(" Product search query failed:", err.message);
             } else {
-                console.log(`✅ Search query succeeded. Returned ${rows.length} rows.`);
+                console.log(` Search query succeeded. Returned ${rows.length} rows.`);
                 rows.forEach(r => {
                     console.log(`   - Style: ${r.style_number} | Cat: ${r.category} | Fabric: ${r.fabric} | GSM: ${r.gsm} | Price: ₹${r.price_inr}`);
                 });
@@ -62,12 +62,12 @@ function runVerification() {
         // Fetch all tech packs
         db.all("SELECT style_number, image_embedding FROM tech_packs LIMIT 10;", [], (err, rows) => {
             if (err) {
-                console.error("❌ Failed to fetch tech packs for vector math:", err.message);
+                console.error(" Failed to fetch tech packs for vector math:", err.message);
                 db.close();
                 return;
             }
 
-            console.log(`✅ Fetched ${rows.length} tech packs. Simulating CLIP search vector...`);
+            console.log(` Fetched ${rows.length} tech packs. Simulating CLIP search vector...`);
             
             // Create a mock query vector of 512 dimensions (all 0.0 except indices representing 'Dress' and 'Silk')
             // Match indices for categories/fabrics
@@ -103,13 +103,13 @@ function runVerification() {
 
             // Sort matches
             scored.sort((a, b) => b.similarity - a.similarity);
-            console.log("✅ Vector matching complete. Top 3 matches:");
+            console.log(" Vector matching complete. Top 3 matches:");
             scored.slice(0, 3).forEach((item, idx) => {
                 console.log(`   ${idx + 1}. Style: ${item.style} | Similarity Score: ${(item.similarity * 100).toFixed(2)}%`);
             });
 
             db.close(() => {
-                console.log("\n✅ Verification complete. All core backend database logic is validated!");
+                console.log("\n Verification complete. All core backend database logic is validated!");
             });
         });
     }

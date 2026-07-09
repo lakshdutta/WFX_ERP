@@ -105,6 +105,50 @@ function generateSeedData(numFinishedGoods = 200, numOrders = 600) {
 
     // Generate Tech Packs
     const techPacks = [];
+    
+    const categoryImages = {
+        'Dress': [
+            'photo-1595777457583-95e059d581b8',
+            'photo-1572804013309-59a88b7e92f1',
+            'photo-1496747611176-843222e1e57c'
+        ],
+        'Shirt': [
+            'photo-1596755094514-f87e34085b2c',
+            'photo-1603252109303-2751441dd157',
+            'photo-1602810318383-e386cc2a3ccf'
+        ],
+        'Pants': [
+            'photo-1541099649105-f69ad21f3246',
+            'photo-1584308666744-24d5c474f2ae',
+            'photo-1624378439575-d8705ad7ae80'
+        ],
+        'Jacket': [
+            'photo-1551028719-00167b16eac5',
+            'photo-1591047139829-d91aecb6caea',
+            'photo-1544923246-77307dd654cb'
+        ],
+        'T-Shirt': [
+            'photo-1521572267360-ee0c2909d518',
+            'photo-1583743814966-8936f5b7be1a',
+            'photo-1562157873-818bc0726f68'
+        ],
+        'Sweater': [
+            'photo-1434389677669-e08b4cac3105',
+            'photo-1614975058789-41316d0e2e9c',
+            'photo-1620799140408-edc6dcb6d633'
+        ],
+        'Skirt': [
+            'photo-1583496661160-fb5886a0aaaa',
+            'photo-1509551388413-e18d0ac5d495',
+            'photo-1601924994987-69e26d50dc26'
+        ],
+        'Shorts': [
+            'photo-1591195853828-11db59a44f6b',
+            'photo-1519242220831-09410926fbff',
+            'photo-1479064555552-3ef4979f8908'
+        ]
+    };
+
     for (const fg of finishedGoods) {
         const specDetails = `Tech Pack details for Style ${fg.style_number}. A premium ${fg.color} ${fg.category} made from ${fg.gsm} GSM ${fg.fabric}. Features reinforced stitching, standard sizing template fit, and customized branding label. Pre-shrunk fabric treatment applied. Tailored cuffs and custom buttons included.`;
         
@@ -127,7 +171,10 @@ function generateSeedData(numFinishedGoods = 200, numOrders = 600) {
         
         const mag = Math.sqrt(magSq);
         const normalizedEmb = emb.map(x => Number((x / mag).toFixed(6)));
-        const imageUrl = `https://images.unsplash.com/photo-1543087903-1ac2ec7aa8c5?auto=format&fit=crop&w=400&q=80&sig=${randInt(1, 1000)}`;
+        
+        const imgPool = categoryImages[fg.category] || ['photo-1543087903-1ac2ec7aa8c5'];
+        const randomImgId = imgPool[randInt(0, imgPool.length - 1)];
+        const imageUrl = `https://images.unsplash.com/${randomImgId}?auto=format&fit=crop&w=400&q=80`;
         
         techPacks.push({
             style_number: fg.style_number,
@@ -240,8 +287,10 @@ function generateSeedData(numFinishedGoods = 200, numOrders = 600) {
         sqlLines.push(`INSERT INTO sales_invoices (invoice_number, order_number, amount_inr, payment_status, issue_date, due_date) VALUES ('${inv.invoice_number}', '${inv.order_number}', ${inv.amount_inr}, '${inv.payment_status}', '${inv.issue_date}', '${inv.due_date}');`);
     });
 
-    fs.writeFileSync('C:/Users/laksh/.gemini/antigravity/scratch/ERP/database/seed.sql', sqlLines.join('\n'), 'utf-8');
-    console.log("Generated seed.sql successfully!");
+    const path = require('path');
+    const outputPath = path.resolve(__dirname, 'seed.sql');
+    fs.writeFileSync(outputPath, sqlLines.join('\n'), 'utf-8');
+    console.log("Generated seed.sql successfully at:", outputPath);
 }
 
 generateSeedData();
