@@ -37,7 +37,7 @@ function getEmbedding(category, fabric) {
     });
     fabrics.forEach((f, idx) => {
         if (fab.includes(f)) {
-            vector[idx] += 10.0;
+            vector[idx + 8] += 10.0;
         }
     });
     

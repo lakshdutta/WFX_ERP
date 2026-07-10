@@ -18,7 +18,7 @@ export default function ProductSearch() {
   const [sortDir, setSortDir] = useState('asc');
   
   // Available filters
-  const categories = ['Dress', 'Shirt', 'Pants', 'Jacket', 'T-Shirt', 'Sweater', 'Skirt', 'Shorts'];
+  const categories = ['Dress', 'Shirt', 'Pants', 'Jacket', 'T-Shirt', 'Hoodie', 'Sweatshirt', 'Polo', 'Skirt', 'Shorts'];
   const fabrics = ['Cotton', 'Silk', 'Linen', 'Polyester', 'Wool', 'Denim', 'Rayon', 'Nylon'];
   const prints = ['Solid', 'Striped', 'Floral', 'Polka Dot', 'Checkered', 'Geometric', 'Animal Print', 'Abstract'];
   const seasons = ['Spring', 'Summer', 'Autumn', 'Winter', 'All Season'];
@@ -31,7 +31,7 @@ export default function ProductSearch() {
 
   const fetchFilteredProducts = () => {
     setLoading(true);
-    let url = new URL('http://127.0.0.1:3001/api/search');
+    let url = new URL(`${import.meta.env.VITE_BACKEND_URL}api/search`);
     
     if (q) url.searchParams.append('q', q);
     if (selectedCats.length > 0) url.searchParams.append('category', selectedCats.join(','));

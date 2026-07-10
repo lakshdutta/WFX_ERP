@@ -6,7 +6,7 @@ export default function Dashboard() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('http://127.0.0.1:3001/api/stats')
+    fetch(`${import.meta.env.VITE_BACKEND_URL}api/stats`)
       .then(res => {
         if (!res.ok) throw new Error("Could not fetch stats");
         return res.json();
