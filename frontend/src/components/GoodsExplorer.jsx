@@ -56,64 +56,7 @@ export default function GoodsExplorer() {
 
   return (
     <div className="goods-explorer-root">
-      {/* Scoped responsive overrides. These only kick in at narrower
-          viewports and don't touch desktop layout or any data/fetch logic. */}
-      <style>{`
-        @media (max-width: 900px) {
-          .goods-explorer-root .gallery-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-          }
-          .goods-explorer-root .toolbar-filters {
-            width: 100%;
-          }
-          .goods-explorer-root .toolbar-filters select {
-            flex: 1;
-            min-width: 0;
-          }
-        }
 
-        @media (max-width: 640px) {
-          .goods-explorer-root .gallery-grid {
-            grid-template-columns: 1fr !important;
-          }
-          .goods-explorer-root .toolbar-search-form {
-            min-width: 100% !important;
-          }
-          .goods-explorer-root .toolbar-filters {
-            flex-direction: column !important;
-          }
-          .goods-explorer-root .toolbar-filters select {
-            width: 100%;
-          }
-          .goods-explorer-root .pagination-controls {
-            flex-wrap: wrap !important;
-            gap: 0.5rem;
-            text-align: center;
-          }
-          .goods-explorer-root .modal-content {
-            width: 92vw !important;
-            max-height: 88vh !important;
-          }
-          .goods-explorer-root .modal-image {
-            max-height: 220px !important;
-          }
-          .goods-explorer-root .modal-spec-grid {
-            grid-template-columns: 1fr !important;
-          }
-          .goods-explorer-root .modal-spec-grid > div[data-span2] {
-            grid-column: span 1 !important;
-          }
-        }
-
-        @media (max-width: 420px) {
-          .goods-explorer-root .modal-body {
-            padding: 1rem !important;
-          }
-          .goods-explorer-root .product-price {
-            font-size: 1.1rem !important;
-          }
-        }
-      `}</style>
 
       {/* Search and Sort Toolbar */}
       <div className="glass-card" style={{ marginBottom: '2rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between' }}>

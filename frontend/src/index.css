@@ -872,3 +872,242 @@ body {
     transform: translateY(0);
   }
 }
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .search-layout {
+    grid-template-columns: 220px 1fr;
+    gap: 1.5rem;
+  }
+  
+  .dashboard-root .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .goods-explorer-root .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .goods-explorer-root .toolbar-filters {
+    width: 100%;
+  }
+  .goods-explorer-root .toolbar-filters select {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .image-search-root .search-panels-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    position: static;
+    width: 100%;
+    height: auto;
+    padding: 1rem 1.5rem;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .logo-container {
+    margin-bottom: 1rem;
+  }
+
+  .nav-links {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+
+  .nav-item {
+    white-space: nowrap;
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 1.5rem;
+    min-height: auto;
+  }
+
+  .search-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .filter-sidebar {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  
+  .modal-content {
+    grid-template-columns: 1fr;
+    height: auto;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  .modal-image {
+    height: 250px;
+  }
+  
+  .dashboard-trends-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-root .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-root .stat-card[data-span2] {
+    grid-column: span 1 !important;
+  }
+  
+  .dashboard-root .chart-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .goods-explorer-root .gallery-grid {
+    grid-template-columns: 1fr;
+  }
+  .goods-explorer-root .toolbar-search-form {
+    min-width: 100%;
+  }
+  .goods-explorer-root .toolbar-filters {
+    flex-direction: column;
+  }
+  .goods-explorer-root .toolbar-filters select {
+    width: 100%;
+  }
+  .goods-explorer-root .pagination-controls {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    text-align: center;
+  }
+  .goods-explorer-root .modal-content {
+    width: 92vw;
+    max-height: 88vh;
+  }
+  .goods-explorer-root .modal-image {
+    max-height: 220px;
+  }
+  .goods-explorer-root .modal-spec-grid {
+    grid-template-columns: 1fr;
+  }
+  .goods-explorer-root .modal-spec-grid > div[data-span2] {
+    grid-column: span 1;
+  }
+
+  .image-search-root .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .image-search-root .results-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .image-search-root .dropzone-container {
+    min-height: 160px;
+  }
+
+  .nlquery-root .chat-history {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  .nlquery-root .chat-bubble {
+    max-width: 88%;
+  }
+  .nlquery-root .sql-code {
+    font-size: 0.75rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .nlquery-root .results-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .nlquery-root .results-table {
+    font-size: 0.8rem;
+  }
+  .nlquery-root .results-table th,
+  .nlquery-root .results-table td {
+    white-space: nowrap;
+    padding: 0.4rem 0.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-sidebar {
+    grid-template-columns: 1fr;
+  }
+  
+  .gallery-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .top-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .dashboard-root .stat-value {
+    font-size: 1.5rem;
+  }
+  
+  .dashboard-root .category-row-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .dashboard-root .chart-tooltip {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.4rem;
+  }
+  
+  .goods-explorer-root .modal-body {
+    padding: 1rem;
+  }
+  .goods-explorer-root .product-price {
+    font-size: 1.1rem;
+  }
+  
+  .image-search-root .gallery-grid {
+    grid-template-columns: 1fr;
+  }
+  .image-search-root .similarity-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .nlquery-root .chat-bubble {
+    max-width: 100%;
+  }
+  .nlquery-root .chat-input-area {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .nlquery-root .chat-input-area input {
+    width: 100%;
+  }
+  .nlquery-root .chat-input-area button {
+    width: 100%;
+  }
+  .nlquery-root .sql-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+  }
+}
+

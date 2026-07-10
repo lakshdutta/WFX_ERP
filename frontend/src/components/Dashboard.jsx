@@ -32,46 +32,7 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-root">
-      {/* Scoped responsive overrides. These only kick in at narrower
-          viewports and don't touch desktop layout or any data logic. */}
-      <style>{`
-        @media (max-width: 900px) {
-          .dashboard-root .stats-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-          }
-          .dashboard-root .dashboard-trends-grid {
-            grid-template-columns: 1fr !important;
-          }
-        }
 
-        @media (max-width: 640px) {
-          .dashboard-root .stats-grid {
-            grid-template-columns: 1fr !important;
-          }
-          .dashboard-root .stat-card[data-span2] {
-            grid-column: span 1 !important;
-          }
-          .dashboard-root .stat-value {
-            font-size: 1.5rem !important;
-          }
-          .dashboard-root .chart-container {
-            overflow-x: auto !important;
-            -webkit-overflow-scrolling: touch;
-          }
-          .dashboard-root .category-row-meta {
-            flex-direction: column !important;
-            align-items: flex-start !important;
-            gap: 0.25rem;
-          }
-        }
-
-        @media (max-width: 420px) {
-          .dashboard-root .chart-tooltip {
-            font-size: 0.7rem !important;
-            padding: 0.25rem 0.4rem !important;
-          }
-        }
-      `}</style>
 
       {/* 1. Stats Cards Grid */}
       <div className="stats-grid">
