@@ -36,7 +36,77 @@ export default function App() {
   const currentHeader = navItems.find(item => item.id === activeTab);
 
   return (
-    <div className="app-container">
+    <div className="app-container app-root">
+      {/* Scoped responsive overrides. These only kick in at narrower
+          viewports and don't touch desktop layout or any state/logic.
+          No new JS state is introduced (e.g. no hamburger toggle) so
+          existing behavior is fully preserved. */}
+      <style>{`
+        @media (max-width: 900px) {
+          .app-root {
+            flex-direction: column !important;
+          }
+          .app-root .sidebar {
+            width: 100% !important;
+            height: auto !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            padding: 0.75rem 1rem !important;
+            gap: 1rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+          }
+          .app-root .logo-container {
+            flex-shrink: 0;
+          }
+          .app-root .sidebar nav {
+            flex: 1;
+            min-width: 0;
+          }
+          .app-root .nav-links {
+            display: flex !important;
+            flex-direction: row !important;
+            gap: 0.4rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 0.15rem;
+          }
+          .app-root .nav-item {
+            flex-shrink: 0;
+            white-space: nowrap;
+          }
+          .app-root .nav-item span:last-child {
+            display: none;
+          }
+          .app-root .nav-item.active span:last-child {
+            display: inline;
+          }
+          .app-root .sidebar > div[style*="margin-top"] {
+            display: none !important;
+          }
+          .app-root .main-content {
+            width: 100% !important;
+          }
+        }
+
+        @media (max-width: 600px) {
+          .app-root .top-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 0.5rem;
+          }
+          .app-root .header-title h1 {
+            font-size: 1.25rem !important;
+          }
+          .app-root .header-title p {
+            font-size: 0.8rem !important;
+          }
+          .app-root .nav-item span:first-child {
+            font-size: 1rem !important;
+          }
+        }
+      `}</style>
+
       {/* 1. Fixed Sidebar */}
       <aside className="sidebar">
         <div className="logo-container">

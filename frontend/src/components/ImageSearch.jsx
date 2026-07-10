@@ -66,10 +66,44 @@ export default function ImageSearch() {
   };
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%' }}>
-      
+    <div className="image-search-root" style={{ maxWidth: '1000px', margin: '0 auto', width: '100%' }}>
+      {/* Scoped responsive overrides. These only kick in at narrower
+          viewports and don't touch desktop layout or any upload/fetch logic. */}
+      <style>{`
+        @media (max-width: 800px) {
+          .image-search-root .search-panels-grid {
+            grid-template-columns: 1fr !important;
+            gap: 1.25rem !important;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .image-search-root .gallery-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          .image-search-root .results-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 0.5rem;
+          }
+          .image-search-root .dropzone-container {
+            min-height: 160px !important;
+          }
+        }
+
+        @media (max-width: 420px) {
+          .image-search-root .gallery-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .image-search-root .similarity-badge {
+            font-size: 0.7rem !important;
+            padding: 0.2rem 0.4rem !important;
+          }
+        }
+      `}</style>
+
       {/* Search Input Panels */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2.5rem' }}>
+      <div className="search-panels-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2.5rem' }}>
         
         {/* Upload Zone */}
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -141,7 +175,7 @@ export default function ImageSearch() {
       </div>
 
       {/* Results Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+      <div className="results-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h2 style={{ fontSize: '1.4rem', fontWeight: 700 }}>Visually Similar Products ({items.length})</h2>
         {searchMethod && (
           <span style={{ fontSize: '0.8rem', background: 'rgba(255,255,255,0.05)', padding: '0.25rem 0.5rem', borderRadius: '4px', color: 'var(--text-muted)' }}>

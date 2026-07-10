@@ -57,7 +57,59 @@ export default function NLQuery() {
   };
 
   return (
-    <div className="chat-container-layout">
+    <div className="chat-container-layout nlquery-root">
+      {/* Scoped responsive overrides. These only kick in at narrower
+          viewports and don't touch desktop layout or any data/fetch logic. */}
+      <style>{`
+        @media (max-width: 768px) {
+          .nlquery-root .chat-history {
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+          }
+          .nlquery-root .chat-bubble {
+            max-width: 88% !important;
+          }
+          .nlquery-root .sql-code {
+            font-size: 0.75rem !important;
+            white-space: pre-wrap !important;
+            word-break: break-word !important;
+          }
+          .nlquery-root .results-table-container {
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch;
+          }
+          .nlquery-root .results-table {
+            font-size: 0.8rem !important;
+          }
+          .nlquery-root .results-table th,
+          .nlquery-root .results-table td {
+            white-space: nowrap !important;
+            padding: 0.4rem 0.6rem !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .nlquery-root .chat-bubble {
+            max-width: 100% !important;
+          }
+          .nlquery-root .chat-input-area {
+            flex-direction: column !important;
+            gap: 0.5rem !important;
+          }
+          .nlquery-root .chat-input-area input {
+            width: 100% !important;
+          }
+          .nlquery-root .chat-input-area button {
+            width: 100% !important;
+          }
+          .nlquery-root .sql-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 0.15rem;
+          }
+        }
+      `}</style>
+
       {/* Messages History */}
       <div className="chat-history">
         {messages.map((msg) => (
