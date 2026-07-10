@@ -5,6 +5,8 @@ import path from 'path';
 dotenv.config();
 dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
 console.log("DATABASE_URL:", process.env.DATABASE_URL ? "FOUND" : "MISSING");
+console.log("OPENAI_API_KEY:", process.env.OPENAI_API_KEY ? "FOUND" : "MISSING");
+console.log("PORT:", process.env.PORT ? "FOUND" : "MISSING");
 export const config = {
   port: process.env.PORT || 8000,
   openaiApiKey: process.env.OPENAI_API_KEY || '',
